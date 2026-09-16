@@ -19,6 +19,9 @@ ALL_AGENTS = [
     "git",
     "documentation",
     "orchestrator",
+    "product-requirements",
+    "static-prototyping",
+    "dynamic-prototyping",
 ]
 
 ALL_TOOLS = ["copilot", "opencode", "claude"]

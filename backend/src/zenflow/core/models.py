@@ -83,3 +83,18 @@ class DeploymentResult:
     tools: ToolSelection
     guidelines: GuidelineSelection
     deployed: dict[str, str]
+
+
+@dataclass(frozen=True)
+class AgentInfo:
+    """Summary of one available agent template.
+
+    Attributes:
+        id: Template filename stem (e.g. 'backend'), used as the stable agent identifier.
+        name: Human-readable agent name from its frontmatter.
+        description: One-line description from its frontmatter.
+    """
+
+    id: str
+    name: str
+    description: str

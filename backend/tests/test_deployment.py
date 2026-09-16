@@ -18,7 +18,17 @@ FRONTEND_ARCH = "react-typescript.md.j2"
 BACKEND_DOC = "java-spring-boot.md.j2"
 FRONTEND_DOC = "react-typescript.md.j2"
 
-ALL_AGENT_NAMES = {"backend", "frontend", "reviewer", "git", "documentation", "orchestrator"}
+ALL_AGENT_NAMES = {
+    "backend",
+    "frontend",
+    "reviewer",
+    "git",
+    "documentation",
+    "orchestrator",
+    "product-requirements",
+    "static-prototyping",
+    "dynamic-prototyping",
+}
 
 
 # ---------------------------------------------------------------------------
