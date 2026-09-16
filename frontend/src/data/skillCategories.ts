@@ -6,12 +6,10 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     title: "Product and Design",
     color: "#c81c5c",
     tint: "#fbe7ee",
-    disabled: true, // no backend support yet
     skills: [
-      { id: "prd-generation", label: "PRD generation" },
-      { id: "low-fi-design", label: "Low-fi design" },
-      { id: "dynamic-prototyping", label: "Dynamic prototyping" },
-      { id: "data-exploration", label: "Data exploration" },
+      { id: "prd-generation", label: "PRD generation", sublabel: "product requirements document" },
+      { id: "low-fi-design", label: "Low-fi design", sublabel: "greyscale wireframes" },
+      { id: "dynamic-prototyping", label: "Dynamic prototyping", sublabel: "Proof Of Concept with real data, using html and Javascript" },
     ],
   },
   {
@@ -20,11 +18,11 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     color: "#1c8a5c",
     tint: "#e6f5ee",
     skills: [
-      { id: "backend", label: "Backend" }, // -> backend agent
-      { id: "frontend", label: "Frontend" }, // -> frontend agent
-      { id: "documentation", label: "Documentation" }, // -> documentation agent
+      { id: "backend", label: "Backend", sublabel: "backend agent" },
+      { id: "frontend", label: "Frontend", sublabel: "frontend agent" },
+      { id: "documentation", label: "Documentation", sublabel: "documentation agent" },
       { id: "tech-migration", label: "Tech Migration", disabled: true }, // no backend agent
-      { id: "code-review", label: "Code review" }, // -> reviewer agent
+      { id: "code-review", label: "Code review", sublabel: "reviewer agent" },
     ],
   },
   {

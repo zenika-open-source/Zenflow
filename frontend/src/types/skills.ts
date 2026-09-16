@@ -6,6 +6,8 @@ export type SkillMode = "none" | "skill" | "custom";
 export interface Skill {
   id: string;
   label: string;
+  /** Optional second line of text, shown in the same muted style as the "(coming soon)" tag. */
+  sublabel?: string;
   /** True when this skill has no corresponding backend agent yet — locked to "None". */
   disabled?: boolean;
 }
