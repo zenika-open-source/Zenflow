@@ -1,11 +1,15 @@
 import { API_BASE_URL } from "@/api/config";
 import type { GuidelineSelection, ToolSelection } from "@/types/zenflow";
 
-export async function downloadArchive(tools: ToolSelection, guidelines: GuidelineSelection): Promise<void> {
+export async function downloadArchive(
+  tools: ToolSelection,
+  guidelines: GuidelineSelection,
+  skills: string[],
+): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/init/archive`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tools, guidelines }),
+    body: JSON.stringify({ tools, guidelines, skills }),
   });
 
   if (!response.ok) {

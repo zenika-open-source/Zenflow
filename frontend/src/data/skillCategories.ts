@@ -24,6 +24,8 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
       { id: "documentation", label: "Documentation" }, // -> documentation agent
       { id: "tech-migration", label: "Tech Migration", disabled: true }, // no backend agent
       { id: "code-review", label: "Code review" }, // -> reviewer agent
+      { id: "orchestrator", label: "Full-stack orchestration" }, // -> orchestrator agent
+      { id: "git", label: "Git workflow" }, // -> git agent
     ],
   },
   {
