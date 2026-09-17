@@ -60,6 +60,7 @@ def _deploy_copilot(
     src: SourceDirs,
     repo_root: str,
     guidelines: GuidelineSelection,
+    agent_ids: frozenset[str] | None,
 ) -> str:
     """Deploy GitHub Copilot (VS Code) setup to target_path.
 
@@ -68,6 +69,7 @@ def _deploy_copilot(
         src: Source directory paths.
         repo_root: Repository root path.
         guidelines: User's guideline file choices.
+        agent_ids: Agent ids to deploy, or None to deploy every agent.
 
     Returns:
         The deployed .github directory path.
@@ -80,7 +82,7 @@ def _deploy_copilot(
     os.makedirs(instructions_dir, exist_ok=True)
     os.makedirs(guidelines_dir, exist_ok=True)
 
-    deploy_agents(src.agents, agents_dir, repo_root, tool="copilot", skill_mode=False)
+    deploy_agents(src.agents, agents_dir, repo_root, tool="copilot", skill_mode=False, agent_ids=agent_ids)
 
     for f in glob.glob(os.path.join(src.instructions, "*.md")):
         shutil.copy(f, instructions_dir)
@@ -104,6 +106,7 @@ def _deploy_skills_tool(
     src: SourceDirs,
     repo_root: str,
     guidelines: GuidelineSelection,
+    agent_ids: frozenset[str] | None,
 ) -> str:
     """Deploy a skills-based tool (OpenCode or Claude Code) to target_path.
 
@@ -114,12 +117,13 @@ def _deploy_skills_tool(
         src: Source directory paths.
         repo_root: Repository root path.
         guidelines: User's guideline file choices.
+        agent_ids: Agent ids to deploy, or None to deploy every agent.
 
     Returns:
         The deployed skills directory path.
     """
     skills_dir = os.path.join(target_path, tool_subdir)
-    deploy_agents(src.agents, skills_dir, repo_root, tool=tool, skill_mode=True)
+    deploy_agents(src.agents, skills_dir, repo_root, tool=tool, skill_mode=True, agent_ids=agent_ids)
     deploy_guidelines_to_skills(
         skills_dir,
         repo_root,
@@ -138,6 +142,7 @@ def init_project(
     target_path: str,
     tools: ToolSelection,
     guidelines: GuidelineSelection,
+    agent_ids: frozenset[str] | None = None,
 ) -> DeploymentResult:
     """Deploy the selected tools and guideline templates to target_path.
 
@@ -146,6 +151,8 @@ def init_project(
         target_path: Destination project root.
         tools: Which AI tools to deploy.
         guidelines: Selected guideline template files.
+        agent_ids: Agent ids to deploy, or None to deploy every agent (e.g. the
+            CLI, which has no skill selection).
 
     Returns:
         DeploymentResult describing what was deployed.
@@ -162,12 +169,14 @@ def init_project(
     deployed: dict[str, str] = {}
 
     if tools.copilot:
-        deployed["copilot"] = _deploy_copilot(target_path, src, repo_root, guidelines)
+        deployed["copilot"] = _deploy_copilot(target_path, src, repo_root, guidelines, agent_ids)
     if tools.opencode:
         deployed["opencode"] = _deploy_skills_tool(
-            target_path, ".opencode/skills", "opencode", src, repo_root, guidelines
+            target_path, ".opencode/skills", "opencode", src, repo_root, guidelines, agent_ids
         )
     if tools.claude:
-        deployed["claude"] = _deploy_skills_tool(target_path, ".claude/skills", "claude", src, repo_root, guidelines)
+        deployed["claude"] = _deploy_skills_tool(
+            target_path, ".claude/skills", "claude", src, repo_root, guidelines, agent_ids
+        )
 
     return DeploymentResult(target_path=target_path, tools=tools, guidelines=guidelines, deployed=deployed)

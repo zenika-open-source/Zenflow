@@ -46,6 +46,7 @@ class InitRequest(BaseModel):
     target_path: str
     tools: ToolSelectionRequest
     guidelines: GuidelineSelectionRequest = Field(default_factory=GuidelineSelectionRequest)
+    skills: list[str] | None = None
 
 
 class InitResponse(BaseModel):

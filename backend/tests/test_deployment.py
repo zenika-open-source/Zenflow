@@ -11,6 +11,7 @@ from zenflow.core.deployment import (
     deploy_agents,
     deploy_guidelines_to_github,
     deploy_guidelines_to_skills,
+    resolve_agent_ids,
 )
 
 BACKEND_ARCH = "java-spring-boot.md.j2"
@@ -128,6 +129,55 @@ def test_claude_skills_use_correct_guideline_paths(repo_root: str, tmp_target: P
     backend = (skills_dir / "backend" / "SKILL.md").read_text()
     assert ".claude/skills/backend/references/architecture.md" in backend
     assert ".github/guidelines" not in backend
+
+
+# ---------------------------------------------------------------------------
+# deploy_agents — agent_ids filtering
+# ---------------------------------------------------------------------------
+
+
+def test_deploy_agents_filters_to_selected_ids(repo_root: str, tmp_target: Path) -> None:
+    """Only the selected agent ids are deployed — nothing else is force-included."""
+    agents_src = os.path.join(repo_root, "templates", "agents")
+    target_dir = tmp_target / ".github" / "agents"
+    deploy_agents(
+        agents_src,
+        str(target_dir),
+        repo_root,
+        tool="copilot",
+        skill_mode=False,
+        agent_ids=frozenset({"product-requirements", "static-prototyping"}),
+    )
+
+    produced = {f.stem.replace(".agent", "") for f in target_dir.glob("*.agent.md")}
+    assert produced == {"product-requirements", "static-prototyping"}
+
+
+def test_deploy_agents_empty_selection_deploys_nothing(repo_root: str, tmp_target: Path) -> None:
+    """An empty agent_ids selection deploys no agents at all."""
+    agents_src = os.path.join(repo_root, "templates", "agents")
+    target_dir = tmp_target / ".github" / "agents"
+    deploy_agents(
+        agents_src, str(target_dir), repo_root, tool="copilot", skill_mode=False, agent_ids=frozenset()
+    )
+
+    produced = {f.stem.replace(".agent", "") for f in target_dir.glob("*.agent.md")}
+    assert produced == set()
+
+
+def test_deploy_agents_none_deploys_all(repo_root: str, tmp_target: Path) -> None:
+    """agent_ids=None (the default) preserves the old deploy-everything behavior."""
+    agents_src = os.path.join(repo_root, "templates", "agents")
+    target_dir = tmp_target / ".github" / "agents"
+    deploy_agents(agents_src, str(target_dir), repo_root, tool="copilot", skill_mode=False, agent_ids=None)
+
+    produced = {f.stem.replace(".agent", "") for f in target_dir.glob("*.agent.md")}
+    assert produced == ALL_AGENT_NAMES
+
+
+def test_resolve_agent_ids_maps_code_review_to_reviewer() -> None:
+    """The 'code-review' skill id maps to the 'reviewer' agent id."""
+    assert resolve_agent_ids(["code-review", "backend"]) == frozenset({"reviewer", "backend"})
 
 
 # ---------------------------------------------------------------------------

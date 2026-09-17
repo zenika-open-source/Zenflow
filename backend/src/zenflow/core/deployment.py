@@ -8,6 +8,25 @@ import os
 from zenflow.core.guidelines import guidelines_context
 from zenflow.core.rendering import assemble_agent, assemble_guideline, make_env
 
+# Maps a frontend skill id to its backend agent template id, for the ids that
+# don't already match 1:1 (e.g. the "Code review" skill deploys the reviewer
+# agent).
+SKILL_ID_TO_AGENT_ID: dict[str, str] = {
+    "code-review": "reviewer",
+}
+
+
+def resolve_agent_ids(skill_ids: list[str]) -> frozenset[str]:
+    """Translate frontend skill ids into backend agent template ids.
+
+    Args:
+        skill_ids: Skill ids selected by the user (e.g. "code-review").
+
+    Returns:
+        The corresponding agent ids (e.g. "reviewer").
+    """
+    return frozenset(SKILL_ID_TO_AGENT_ID.get(skill_id, skill_id) for skill_id in skill_ids)
+
 
 def deploy_agents(
     agents_src_dir: str,
@@ -16,8 +35,9 @@ def deploy_agents(
     tool: str,
     *,
     skill_mode: bool = False,
+    agent_ids: frozenset[str] | None = None,
 ) -> None:
-    """Render and deploy all agent templates.
+    """Render and deploy the selected agent templates.
 
     Args:
         agents_src_dir: Directory containing *.agent.md.j2 source files.
@@ -25,6 +45,8 @@ def deploy_agents(
         repo_root: Repository root path.
         tool: Tool name for guidelines context ('copilot', 'opencode', 'claude').
         skill_mode: If True, strips handoffs and appends Next Steps block.
+        agent_ids: Agent ids to deploy. If None, every agent template is
+            deployed (used when no selection applies, e.g. the CLI).
     """
     os.makedirs(target_agents_dir, exist_ok=True)
     context = {"guidelines": guidelines_context(tool)}
@@ -33,6 +55,9 @@ def deploy_agents(
     for agent_file in glob.glob(os.path.join(agents_src_dir, "*.md.j2")):
         agent_name = os.path.splitext(os.path.splitext(os.path.basename(agent_file))[0])[0]
         template_path = f"agents/{os.path.basename(agent_file)}"
+
+        if agent_ids is not None and agent_name not in agent_ids:
+            continue
 
         if skill_mode:
             skill_dir = os.path.join(target_agents_dir, agent_name)
