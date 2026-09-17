@@ -28,18 +28,18 @@ def test_guidelines_context_returns_all_keys(tool: str) -> None:
 @pytest.mark.parametrize(
     "key,expected",
     [
-        ("backend_arch", "@.github/guidelines/architecture-backend.md"),
-        ("frontend_arch", "@.github/guidelines/architecture-frontend.md"),
-        ("review_backend", "@.github/guidelines/review-backend.md"),
-        ("review_frontend", "@.github/guidelines/review-frontend.md"),
-        ("documentation_backend", "@.github/guidelines/documentation-backend.md"),
-        ("documentation_frontend", "@.github/guidelines/documentation-frontend.md"),
-        ("conventions", "@.github/guidelines/conventions.md"),
-        ("project_context", "@.github/copilot-instructions.md"),
+        ("backend_arch", ".github/skills/backend/references/architecture.md"),
+        ("frontend_arch", ".github/skills/frontend/references/architecture.md"),
+        ("review_backend", ".github/skills/reviewer/references/review-backend.md"),
+        ("review_frontend", ".github/skills/reviewer/references/review-frontend.md"),
+        ("documentation_backend", ".github/skills/documentation/references/documentation-backend.md"),
+        ("documentation_frontend", ".github/skills/documentation/references/documentation-frontend.md"),
+        ("conventions", ".github/skills/git/references/conventions.md"),
+        ("project_context", ".github/copilot-instructions.md"),
     ],
 )
 def test_copilot_paths(key: str, expected: str) -> None:
-    """Copilot paths reference .github/guidelines/ with @ prefix."""
+    """Copilot paths reference .github/skills/<skill>/references/, same shape as OpenCode/Claude."""
     assert guidelines_context("copilot")[key] == expected
 
 

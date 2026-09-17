@@ -119,6 +119,7 @@ export default function Home() {
         open={generateModalOpen}
         tools={tools}
         guidelines={guidelines}
+        skillSelections={skillSelections}
         onClose={() => setGenerateModalOpen(false)}
       />
     </div>

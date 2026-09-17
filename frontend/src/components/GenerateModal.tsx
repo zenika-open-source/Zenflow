@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { downloadArchive } from "@/api/archive";
 import { Button } from "@/components/ui/Button";
+import type { SkillMode } from "@/types/skills";
 import type { GuidelineSelection, ToolSelection } from "@/types/zenflow";
 
 type Phase = "confirm" | "loading" | "success" | "error";
@@ -9,10 +10,11 @@ interface GenerateModalProps {
   open: boolean;
   tools: ToolSelection;
   guidelines: GuidelineSelection;
+  skillSelections: Record<string, SkillMode>;
   onClose: () => void;
 }
 
-export function GenerateModal({ open, tools, guidelines, onClose }: GenerateModalProps) {
+export function GenerateModal({ open, tools, guidelines, skillSelections, onClose }: GenerateModalProps) {
   const [phase, setPhase] = useState<Phase>("confirm");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -27,7 +29,10 @@ export function GenerateModal({ open, tools, guidelines, onClose }: GenerateModa
   async function handleConfirm() {
     setPhase("loading");
     try {
-      await downloadArchive(tools, guidelines);
+      const skills = Object.entries(skillSelections)
+        .filter(([, mode]) => mode !== "none")
+        .map(([skillId]) => skillId);
+      await downloadArchive(tools, guidelines, skills);
       setPhase("success");
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Something went wrong");

@@ -41,7 +41,7 @@ def test_deploys_selected_tools_and_reports_result(repo_root: str, tmp_target: P
     assert set(result.deployed) == {"copilot", "opencode"}
     assert os.path.isdir(result.deployed["copilot"])
     assert os.path.isdir(result.deployed["opencode"])
-    assert (tmp_target / ".github" / "agents" / "backend.agent.md").exists()
+    assert (tmp_target / ".github" / "skills" / "backend" / "SKILL.md").exists()
     assert (tmp_target / ".opencode" / "skills" / "backend" / "SKILL.md").exists()
     assert not (tmp_target / ".claude").exists()
 

@@ -17,6 +17,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from zenflow.core.deployment import resolve_agent_ids
 from zenflow.core.errors import ZenflowError
 from zenflow.core.service import init_project, repo_root
 from zenflow.routers.schemas import ErrorResponse, GuidelineSelectionRequest, ToolSelectionRequest
@@ -29,6 +30,7 @@ class ArchiveRequest(BaseModel):
 
     tools: ToolSelectionRequest
     guidelines: GuidelineSelectionRequest = Field(default_factory=GuidelineSelectionRequest)
+    skills: list[str] | None = None
 
 
 def _zip_directory(directory: str) -> io.BytesIO:
@@ -64,9 +66,16 @@ def init_archive(request: ArchiveRequest) -> StreamingResponse:
     Raises:
         HTTPException: 400 if no tool is selected or a source directory is missing.
     """
+    agent_ids = resolve_agent_ids(request.skills) if request.skills is not None else None
     tmp_dir = tempfile.mkdtemp(prefix="zenflow-")
     try:
-        init_project(repo_root(), tmp_dir, request.tools.to_domain(), request.guidelines.to_domain())
+        init_project(
+            repo_root(),
+            tmp_dir,
+            request.tools.to_domain(),
+            request.guidelines.to_domain(),
+            agent_ids,
+        )
         buffer = _zip_directory(tmp_dir)
     except ZenflowError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -19,6 +19,9 @@ ALL_AGENTS = [
     "git",
     "documentation",
     "orchestrator",
+    "product-requirements",
+    "static-prototyping",
+    "dynamic-prototyping",
 ]
 
 ALL_TOOLS = ["copilot", "opencode", "claude"]
@@ -138,7 +141,7 @@ def test_skill_agent_has_no_tools_or_user_invocable(repo_root: str, agent: str, 
 @pytest.mark.parametrize(
     "tool,expected_arch",
     [
-        ("copilot", "@.github/guidelines/architecture-backend.md"),
+        ("copilot", ".github/skills/backend/references/architecture.md"),
         ("opencode", ".opencode/skills/backend/references/architecture.md"),
         ("claude", ".claude/skills/backend/references/architecture.md"),
     ],
@@ -153,7 +156,7 @@ def test_backend_agent_arch_path(repo_root: str, tool: str, expected_arch: str) 
 @pytest.mark.parametrize(
     "tool,expected_arch",
     [
-        ("copilot", "@.github/guidelines/architecture-frontend.md"),
+        ("copilot", ".github/skills/frontend/references/architecture.md"),
         ("opencode", ".opencode/skills/frontend/references/architecture.md"),
         ("claude", ".claude/skills/frontend/references/architecture.md"),
     ],
@@ -168,7 +171,7 @@ def test_frontend_agent_arch_path(repo_root: str, tool: str, expected_arch: str)
 @pytest.mark.parametrize(
     "tool,expected_review",
     [
-        ("copilot", "@.github/guidelines/review-backend.md"),
+        ("copilot", ".github/skills/reviewer/references/review-backend.md"),
         ("opencode", ".opencode/skills/reviewer/references/review-backend.md"),
         ("claude", ".claude/skills/reviewer/references/review-backend.md"),
     ],
@@ -183,7 +186,7 @@ def test_reviewer_agent_review_path(repo_root: str, tool: str, expected_review: 
 @pytest.mark.parametrize(
     "tool,expected_ctx",
     [
-        ("copilot", "@.github/copilot-instructions.md"),
+        ("copilot", ".github/copilot-instructions.md"),
         ("opencode", "AGENTS.md"),
         ("claude", "CLAUDE.md"),
     ],
@@ -226,7 +229,7 @@ def test_guideline_templates_include_partials(
 @pytest.mark.parametrize(
     "tool,expected_arch",
     [
-        ("copilot", "@.github/guidelines/architecture-backend.md"),
+        ("copilot", ".github/skills/backend/references/architecture.md"),
         ("opencode", ".opencode/skills/backend/references/architecture.md"),
         ("claude", ".claude/skills/backend/references/architecture.md"),
     ],

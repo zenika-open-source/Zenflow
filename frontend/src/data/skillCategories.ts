@@ -6,12 +6,11 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     title: "Product and Design",
     color: "#c81c5c",
     tint: "#fbe7ee",
-    disabled: true, // no backend support yet
     skills: [
-      { id: "prd-generation", label: "PRD generation" },
-      { id: "low-fi-design", label: "Low-fi design" },
-      { id: "dynamic-prototyping", label: "Dynamic prototyping" },
-      { id: "data-exploration", label: "Data exploration" },
+      { id: "product-requirements", label: "Product Requirements" }, // -> product-requirements agent
+      { id: "static-prototyping", label: "Static prototyping" }, // -> static-prototyping agent
+      { id: "dynamic-prototyping", label: "Dynamic prototyping" }, // -> dynamic-prototyping agent
+      { id: "data-exploration", label: "Data exploration", disabled: true }, // no backend agent yet
     ],
   },
   {
@@ -25,6 +24,8 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
       { id: "documentation", label: "Documentation" }, // -> documentation agent
       { id: "tech-migration", label: "Tech Migration", disabled: true }, // no backend agent
       { id: "code-review", label: "Code review" }, // -> reviewer agent
+      { id: "orchestrator", label: "Full-stack orchestration" }, // -> orchestrator agent
+      { id: "git", label: "Git workflow" }, // -> git agent
     ],
   },
   {

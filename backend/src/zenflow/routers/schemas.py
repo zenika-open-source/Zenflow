@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from zenflow.core.models import DeploymentResult, GuidelineSelection, ToolSelection
+from zenflow.core.models import AgentInfo, DeploymentResult, GuidelineSelection, ToolSelection
 
 
 class ToolSelectionRequest(BaseModel):
@@ -46,6 +46,7 @@ class InitRequest(BaseModel):
     target_path: str
     tools: ToolSelectionRequest
     guidelines: GuidelineSelectionRequest = Field(default_factory=GuidelineSelectionRequest)
+    skills: list[str] | None = None
 
 
 class InitResponse(BaseModel):
@@ -79,3 +80,22 @@ class StackCatalog(BaseModel):
 
     backend: dict[str, list[FrameworkOption]]
     frontend: dict[str, list[FrameworkOption]]
+
+
+class AgentSummary(BaseModel):
+    """A single available agent, as advertised by GET /agents."""
+
+    id: str
+    name: str
+    description: str
+
+    @classmethod
+    def from_domain(cls, agent: AgentInfo) -> AgentSummary:
+        """Build a response entry from a core AgentInfo."""
+        return cls(id=agent.id, name=agent.name, description=agent.description)
+
+
+class AgentCatalog(BaseModel):
+    """Response body for GET /agents."""
+
+    agents: list[AgentSummary]
