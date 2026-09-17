@@ -78,6 +78,8 @@ def deploy_guidelines_to_skills(
     frontend_doc_file: str,
     include_conventions: bool,
     tool: str,
+    *,
+    agent_ids: frozenset[str] | None = None,
 ) -> None:
     """Deploy guideline files into skill references/ subdirs (Copilot / OpenCode / Claude Code).
 
@@ -99,11 +101,17 @@ def deploy_guidelines_to_skills(
         frontend_doc_file: Selected frontend documentation template filename (may be empty).
         include_conventions: Whether to include git conventions.
         tool: Tool name ('opencode' or 'claude') for guidelines context.
+        agent_ids: Skill ids that were actually deployed. If given, reference
+            files are only written into skill folders that are in this set
+            (skipping ones that don't exist because the skill wasn't selected).
+            If None, every applicable reference file is written.
     """
     env = make_env(repo_root)
     ctx: dict[str, object] = {"guidelines": guidelines_context(tool)}
 
     def deploy(src_subdir: str, src_filename: str, skill_name: str, dst_filename: str) -> None:
+        if agent_ids is not None and skill_name not in agent_ids:
+            return
         src_template = f"guidelines/{src_subdir}/{src_filename}"
         dst = os.path.join(target_skills_dir, skill_name, "references", dst_filename)
         assemble_guideline(src_template, dst, env, ctx)

@@ -95,6 +95,7 @@ def _deploy_copilot(
         guidelines.frontend_doc_file,
         guidelines.include_conventions,
         tool="copilot",
+        agent_ids=agent_ids,
     )
     return target_github_dir
 
@@ -133,6 +134,7 @@ def _deploy_skills_tool(
         guidelines.frontend_doc_file,
         guidelines.include_conventions,
         tool=tool,
+        agent_ids=agent_ids,
     )
     return skills_dir
 

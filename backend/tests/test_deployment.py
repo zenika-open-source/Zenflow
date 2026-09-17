@@ -336,3 +336,26 @@ def test_deploy_guidelines_to_skills_omits_frontend_when_skipped(
     assert not (skills_dir / "reviewer" / "references" / "review-frontend.md").exists()
     assert (skills_dir / "backend" / "references" / "architecture.md").exists()
     assert (skills_dir / "reviewer" / "references" / "review-backend.md").exists()
+
+
+def test_deploy_guidelines_to_skills_respects_agent_ids(repo_root: str, tmp_target: Path) -> None:
+    """References must only be written into skill folders selected via agent_ids."""
+    skills_dir = tmp_target / ".github" / "skills"
+
+    deploy_guidelines_to_skills(
+        str(skills_dir),
+        repo_root,
+        BACKEND_ARCH,
+        FRONTEND_ARCH,
+        BACKEND_DOC,
+        FRONTEND_DOC,
+        include_conventions=True,
+        tool="copilot",
+        agent_ids=frozenset({"product-requirements"}),
+    )
+
+    assert not (skills_dir / "backend").exists()
+    assert not (skills_dir / "frontend").exists()
+    assert not (skills_dir / "reviewer").exists()
+    assert not (skills_dir / "documentation").exists()
+    assert not (skills_dir / "git").exists()
