@@ -9,7 +9,6 @@ from pathlib import Path
 
 from zenflow.core.deployment import (
     deploy_agents,
-    deploy_guidelines_to_github,
     deploy_guidelines_to_skills,
 )
 from zenflow.core.errors import ZenflowError
@@ -64,6 +63,9 @@ def _deploy_copilot(
 ) -> str:
     """Deploy GitHub Copilot (VS Code) setup to target_path.
 
+    Agents are deployed as Skills (.github/skills/<name>/SKILL.md), same as
+    OpenCode and Claude Code, since that's the format Copilot loads on-demand.
+
     Args:
         target_path: Root target directory.
         src: Source directory paths.
@@ -75,26 +77,24 @@ def _deploy_copilot(
         The deployed .github directory path.
     """
     target_github_dir = os.path.join(target_path, ".github")
-    agents_dir = os.path.join(target_github_dir, "agents")
+    skills_dir = os.path.join(target_github_dir, "skills")
     instructions_dir = os.path.join(target_github_dir, "instructions")
-    guidelines_dir = os.path.join(target_github_dir, "guidelines")
-    os.makedirs(agents_dir, exist_ok=True)
     os.makedirs(instructions_dir, exist_ok=True)
-    os.makedirs(guidelines_dir, exist_ok=True)
 
-    deploy_agents(src.agents, agents_dir, repo_root, tool="copilot", skill_mode=False, agent_ids=agent_ids)
+    deploy_agents(src.agents, skills_dir, repo_root, tool="copilot", skill_mode=True, agent_ids=agent_ids)
 
     for f in glob.glob(os.path.join(src.instructions, "*.md")):
         shutil.copy(f, instructions_dir)
 
-    deploy_guidelines_to_github(
-        guidelines_dir,
+    deploy_guidelines_to_skills(
+        skills_dir,
         repo_root,
         guidelines.backend_arch_file,
         guidelines.frontend_arch_file,
         guidelines.backend_doc_file,
         guidelines.frontend_doc_file,
         guidelines.include_conventions,
+        tool="copilot",
     )
     return target_github_dir
 

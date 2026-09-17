@@ -122,9 +122,8 @@ def _print_plan(target_path: str, tools: ToolSelection) -> None:
     print()
     print("The following will be generated:")
     if tools.copilot:
-        print("  - .github/agents/        (agent definitions)")
+        print("  - .github/skills/        (Copilot skill definitions + references/)")
         print("  - .github/instructions/  (instruction files)")
-        print("  - .github/guidelines/    (architecture, review, and conventions)")
     if tools.opencode:
         print("  - .opencode/skills/      (OpenCode skill definitions + references/)")
     if tools.claude:
@@ -157,7 +156,7 @@ def _print_summary(result: DeploymentResult) -> None:
     print("Initialization complete.")
     print(f"Target: {result.target_path}")
     if "copilot" in result.deployed:
-        print("✓ GitHub Copilot (VS Code): .github/agents, instructions, and guidelines")
+        print("✓ GitHub Copilot (VS Code): .github/skills/ (with references/) and instructions")
     if "opencode" in result.deployed:
         print("✓ OpenCode: .opencode/skills/ (with references/)")
     if "claude" in result.deployed:

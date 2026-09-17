@@ -25,7 +25,7 @@ Follow the prompts to:
 ### What the script installs
 After running the script, the target repository will have:
 
-- **.github/agents/**, **.github/instructions/**, **.github/guidelines/** (if GitHub Copilot selected)
+- **.github/skills/**, **.github/instructions/** (if GitHub Copilot selected)
 - **.opencode/skills/** (if OpenCode selected)
 - **.claude/skills/** (if Claude Code selected)
 

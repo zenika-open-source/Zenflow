@@ -9,7 +9,6 @@ import pytest
 
 from zenflow.core.deployment import (
     deploy_agents,
-    deploy_guidelines_to_github,
     deploy_guidelines_to_skills,
     resolve_agent_ids,
 )
@@ -131,6 +130,17 @@ def test_claude_skills_use_correct_guideline_paths(repo_root: str, tmp_target: P
     assert ".github/guidelines" not in backend
 
 
+def test_copilot_skills_use_correct_guideline_paths(repo_root: str, tmp_target: Path) -> None:
+    """Copilot backend skill must reference .github/skills/ guideline paths, not .github/guidelines/."""
+    agents_src = os.path.join(repo_root, "templates", "agents")
+    skills_dir = tmp_target / ".github" / "skills"
+    deploy_agents(agents_src, str(skills_dir), repo_root, tool="copilot", skill_mode=True)
+
+    backend = (skills_dir / "backend" / "SKILL.md").read_text()
+    assert ".github/skills/backend/references/architecture.md" in backend
+    assert ".github/guidelines" not in backend
+
+
 # ---------------------------------------------------------------------------
 # deploy_agents — agent_ids filtering
 # ---------------------------------------------------------------------------
@@ -181,138 +191,6 @@ def test_resolve_agent_ids_maps_code_review_to_reviewer() -> None:
 
 
 # ---------------------------------------------------------------------------
-# deploy_guidelines_to_github
-# ---------------------------------------------------------------------------
-
-
-def test_deploy_guidelines_to_github_creates_all_files(repo_root: str, tmp_target: Path) -> None:
-    """deploy_guidelines_to_github must produce all expected guideline files."""
-    guidelines_dir = tmp_target / ".github" / "guidelines"
-
-    deploy_guidelines_to_github(
-        str(guidelines_dir),
-        repo_root,
-        BACKEND_ARCH,
-        FRONTEND_ARCH,
-        BACKEND_DOC,
-        FRONTEND_DOC,
-        include_conventions=True,
-    )
-
-    expected = {
-        "architecture-backend.md",
-        "architecture-frontend.md",
-        "review-backend.md",
-        "review-frontend.md",
-        "documentation-backend.md",
-        "documentation-frontend.md",
-        "conventions.md",
-    }
-    produced = {f.name for f in guidelines_dir.glob("*.md")}
-    assert produced == expected
-
-
-def test_deploy_guidelines_to_github_omits_optional_when_skipped(repo_root: str, tmp_target: Path) -> None:
-    """deploy_guidelines_to_github must omit doc/conventions files when not selected."""
-    guidelines_dir = tmp_target / ".github" / "guidelines"
-
-    deploy_guidelines_to_github(
-        str(guidelines_dir),
-        repo_root,
-        BACKEND_ARCH,
-        FRONTEND_ARCH,
-        backend_doc_file="",
-        frontend_doc_file="",
-        include_conventions=False,
-    )
-
-    produced = {f.name for f in guidelines_dir.glob("*.md")}
-    assert "conventions.md" not in produced
-    assert "documentation-backend.md" not in produced
-    assert "documentation-frontend.md" not in produced
-
-
-def test_deploy_guidelines_to_github_omits_backend_when_skipped(repo_root: str, tmp_target: Path) -> None:
-    """deploy_guidelines_to_github must omit backend files when arch file is empty."""
-    guidelines_dir = tmp_target / ".github" / "guidelines"
-
-    deploy_guidelines_to_github(
-        str(guidelines_dir),
-        repo_root,
-        backend_arch_file="",
-        frontend_arch_file=FRONTEND_ARCH,
-        backend_doc_file="",
-        frontend_doc_file="",
-        include_conventions=False,
-    )
-
-    produced = {f.name for f in guidelines_dir.glob("*.md")}
-    assert "architecture-backend.md" not in produced
-    assert "review-backend.md" not in produced
-    assert "architecture-frontend.md" in produced
-    assert "review-frontend.md" in produced
-
-
-def test_deploy_guidelines_to_github_omits_frontend_when_skipped(repo_root: str, tmp_target: Path) -> None:
-    """deploy_guidelines_to_github must omit frontend files when arch file is empty."""
-    guidelines_dir = tmp_target / ".github" / "guidelines"
-
-    deploy_guidelines_to_github(
-        str(guidelines_dir),
-        repo_root,
-        backend_arch_file=BACKEND_ARCH,
-        frontend_arch_file="",
-        backend_doc_file="",
-        frontend_doc_file="",
-        include_conventions=False,
-    )
-
-    produced = {f.name for f in guidelines_dir.glob("*.md")}
-    assert "architecture-frontend.md" not in produced
-    assert "review-frontend.md" not in produced
-    assert "architecture-backend.md" in produced
-    assert "review-backend.md" in produced
-
-
-def test_deploy_guidelines_to_github_no_jinja_tags(repo_root: str, tmp_target: Path) -> None:
-    """Deployed Copilot guideline files must contain no raw Jinja tags."""
-    guidelines_dir = tmp_target / ".github" / "guidelines"
-
-    deploy_guidelines_to_github(
-        str(guidelines_dir),
-        repo_root,
-        BACKEND_ARCH,
-        FRONTEND_ARCH,
-        BACKEND_DOC,
-        FRONTEND_DOC,
-        include_conventions=True,
-    )
-
-    for f in guidelines_dir.glob("*.md"):
-        content = f.read_text()
-        assert "{{" not in content, f"Unrendered {{{{ in {f.name}"
-        assert "{%" not in content, f"Unrendered {{%  in {f.name}"
-
-
-def test_deploy_guidelines_to_github_copilot_paths_in_review(repo_root: str, tmp_target: Path) -> None:
-    """Review guideline files must reference .github/guidelines/ paths for Copilot."""
-    guidelines_dir = tmp_target / ".github" / "guidelines"
-
-    deploy_guidelines_to_github(
-        str(guidelines_dir),
-        repo_root,
-        BACKEND_ARCH,
-        FRONTEND_ARCH,
-        "",
-        "",
-        include_conventions=False,
-    )
-
-    review = (guidelines_dir / "review-backend.md").read_text()
-    assert "@.github/guidelines/architecture-backend.md" in review
-
-
-# ---------------------------------------------------------------------------
 # deploy_guidelines_to_skills
 # ---------------------------------------------------------------------------
 
@@ -320,6 +198,7 @@ def test_deploy_guidelines_to_github_copilot_paths_in_review(repo_root: str, tmp
 @pytest.mark.parametrize(
     "tool,base",
     [
+        ("copilot", ".github/skills"),
         ("opencode", ".opencode/skills"),
         ("claude", ".claude/skills"),
     ],
@@ -352,10 +231,10 @@ def test_deploy_guidelines_to_skills_creates_references(repo_root: str, tmp_targ
         assert path.exists(), f"Missing: {path.relative_to(tmp_target)}"
 
 
-@pytest.mark.parametrize("tool", ["opencode", "claude"])
+@pytest.mark.parametrize("tool", ["copilot", "opencode", "claude"])
 def test_deploy_guidelines_to_skills_no_github_paths(repo_root: str, tmp_target: Path, tool: str) -> None:
     """Skill reference files must not contain any .github/guidelines paths."""
-    base = ".opencode/skills" if tool == "opencode" else ".claude/skills"
+    base = {"copilot": ".github/skills", "opencode": ".opencode/skills", "claude": ".claude/skills"}[tool]
     skills_dir = tmp_target / base.lstrip("./").replace("/", os.sep)
 
     deploy_guidelines_to_skills(
@@ -374,10 +253,10 @@ def test_deploy_guidelines_to_skills_no_github_paths(repo_root: str, tmp_target:
         assert ".github/guidelines" not in content, f".github/guidelines found in {ref_file.relative_to(tmp_target)}"
 
 
-@pytest.mark.parametrize("tool", ["opencode", "claude"])
+@pytest.mark.parametrize("tool", ["copilot", "opencode", "claude"])
 def test_deploy_guidelines_to_skills_no_jinja_tags(repo_root: str, tmp_target: Path, tool: str) -> None:
     """Skill reference files must contain no raw Jinja tags."""
-    base = ".opencode/skills" if tool == "opencode" else ".claude/skills"
+    base = {"copilot": ".github/skills", "opencode": ".opencode/skills", "claude": ".claude/skills"}[tool]
     skills_dir = tmp_target / base.lstrip("./").replace("/", os.sep)
 
     deploy_guidelines_to_skills(
@@ -400,6 +279,7 @@ def test_deploy_guidelines_to_skills_no_jinja_tags(repo_root: str, tmp_target: P
 @pytest.mark.parametrize(
     "tool,base",
     [
+        ("copilot", ".github/skills"),
         ("opencode", ".opencode/skills"),
         ("claude", ".claude/skills"),
     ],
@@ -430,6 +310,7 @@ def test_deploy_guidelines_to_skills_omits_backend_when_skipped(
 @pytest.mark.parametrize(
     "tool,base",
     [
+        ("copilot", ".github/skills"),
         ("opencode", ".opencode/skills"),
         ("claude", ".claude/skills"),
     ],
