@@ -4,6 +4,25 @@ Provisions Artifact Registry + two Cloud Run services (frontend, backend) for
 Zenflow. State is local (`terraform.tfstate` in this directory) — fine for a
 solo test deployment; see "Moving to remote state" below when you outgrow that.
 
+## CI/CD
+
+[.github/workflows/deploy.yml](../.github/workflows/deploy.yml) redeploys both
+services on every push to `main` (i.e. on merge), authenticating to GCP via
+Workload Identity Federation (pool `github-pool`, provider `github-provider`,
+service account `github-actions-deployer@zenflow-506701.iam.gserviceaccount.com`
+— no long-lived key stored in GitHub). It builds and pushes images tagged with
+the commit SHA and calls `gcloud run deploy` directly, **not** `terraform
+apply` — this repo's Terraform state contains load-balancer resources
+(`google_compute_*`) that aren't defined in any `.tf` file here, so an
+untargeted `apply` from a fresh CI runner would try to destroy them.
+
+This means `terraform apply` (run manually, per the flow below) and the CI
+pipeline both update the same Cloud Run services out-of-band from each other.
+If you run a manual `apply` without passing the current `backend_image`/
+`frontend_image`, it will roll the service back to whatever tag is in
+`terraform.tfvars` — always check `gcloud run services describe` for the
+currently-live image first.
+
 ## Why this is a multi-step apply
 
 The frontend is a static-exported client app: `NEXT_PUBLIC_API_BASE_URL` gets

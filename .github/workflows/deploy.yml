@@ -1,0 +1,95 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: zenflow-506701
+  REGION: europe-west9
+  REGISTRY: europe-west9-docker.pkg.dev/zenflow-506701/zenflow
+  WORKLOAD_IDENTITY_PROVIDER: projects/56191458396/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+  DEPLOYER_SERVICE_ACCOUNT: github-actions-deployer@zenflow-506701.iam.gserviceaccount.com
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_url: ${{ steps.backend_url.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Build backend image
+        run: docker build --platform linux/amd64 -t "${REGISTRY}/backend:${{ github.sha }}" backend
+
+      - name: Push backend image
+        run: docker push "${REGISTRY}/backend:${{ github.sha }}"
+
+      - name: Deploy backend to Cloud Run
+        run: |
+          gcloud run deploy zenflow-backend \
+            --image="${REGISTRY}/backend:${{ github.sha }}" \
+            --region="${REGION}" \
+            --project="${PROJECT_ID}" \
+            --quiet
+
+      - name: Get backend URL
+        id: backend_url
+        run: |
+          url=$(gcloud run services describe zenflow-backend \
+            --region="${REGION}" --project="${PROJECT_ID}" --format='value(status.url)')
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+  deploy-frontend:
+    needs: deploy-backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Build frontend image
+        run: |
+          docker build --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_API_BASE_URL="${{ needs.deploy-backend.outputs.backend_url }}" \
+            -t "${REGISTRY}/frontend:${{ github.sha }}" frontend
+
+      - name: Push frontend image
+        run: docker push "${REGISTRY}/frontend:${{ github.sha }}"
+
+      - name: Deploy frontend to Cloud Run
+        run: |
+          gcloud run deploy zenflow-frontend \
+            --image="${REGISTRY}/frontend:${{ github.sha }}" \
+            --region="${REGION}" \
+            --project="${PROJECT_ID}" \
+            --quiet
