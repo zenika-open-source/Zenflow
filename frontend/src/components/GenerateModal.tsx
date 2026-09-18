@@ -29,10 +29,10 @@ export function GenerateModal({ open, tools, guidelines, skillSelections, onClos
   async function handleConfirm() {
     setPhase("loading");
     try {
-      const skills = Object.entries(skillSelections)
-        .filter(([, mode]) => mode !== "none")
-        .map(([skillId]) => skillId);
-      await downloadArchive(tools, guidelines, skills);
+      const entries = Object.entries(skillSelections);
+      const skills = entries.filter(([, mode]) => mode === "skill").map(([skillId]) => skillId);
+      const customSkills = entries.filter(([, mode]) => mode === "custom").map(([skillId]) => skillId);
+      await downloadArchive(tools, guidelines, skills, customSkills);
       setPhase("success");
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Something went wrong");

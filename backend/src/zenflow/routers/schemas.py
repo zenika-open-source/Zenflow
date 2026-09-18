@@ -47,6 +47,7 @@ class InitRequest(BaseModel):
     tools: ToolSelectionRequest
     guidelines: GuidelineSelectionRequest = Field(default_factory=GuidelineSelectionRequest)
     skills: list[str] | None = None
+    custom_skills: list[str] | None = None
 
 
 class InitResponse(BaseModel):

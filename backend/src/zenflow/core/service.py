@@ -60,28 +60,38 @@ def _deploy_copilot(
     repo_root: str,
     guidelines: GuidelineSelection,
     agent_ids: frozenset[str] | None,
+    custom_agent_ids: frozenset[str] | None,
 ) -> str:
     """Deploy GitHub Copilot (VS Code) setup to target_path.
 
-    Agents are deployed as Skills (.github/skills/<name>/SKILL.md), same as
-    OpenCode and Claude Code, since that's the format Copilot loads on-demand.
+    Agents in agent_ids are deployed as Skills (.github/skills/<name>/SKILL.md),
+    same as OpenCode and Claude Code, since that's the format Copilot loads
+    on-demand. Agents in custom_agent_ids are deployed as standalone Custom
+    Agent files (.github/agents/<name>.agent.md) instead.
 
     Args:
         target_path: Root target directory.
         src: Source directory paths.
         repo_root: Repository root path.
         guidelines: User's guideline file choices.
-        agent_ids: Agent ids to deploy, or None to deploy every agent.
+        agent_ids: Agent ids to deploy as Skills, or None to deploy every agent.
+        custom_agent_ids: Agent ids to deploy as Custom Agent files, or None/empty
+            to skip this format entirely.
 
     Returns:
         The deployed .github directory path.
     """
     target_github_dir = os.path.join(target_path, ".github")
     skills_dir = os.path.join(target_github_dir, "skills")
+    agents_dir = os.path.join(target_github_dir, "agents")
     instructions_dir = os.path.join(target_github_dir, "instructions")
     os.makedirs(instructions_dir, exist_ok=True)
 
     deploy_agents(src.agents, skills_dir, repo_root, tool="copilot", skill_mode=True, agent_ids=agent_ids)
+    if custom_agent_ids:
+        deploy_agents(
+            src.agents, agents_dir, repo_root, tool="copilot", skill_mode=False, agent_ids=custom_agent_ids
+        )
 
     for f in glob.glob(os.path.join(src.instructions, "*.md")):
         shutil.copy(f, instructions_dir)
@@ -110,6 +120,10 @@ def _deploy_skills_tool(
     agent_ids: frozenset[str] | None,
 ) -> str:
     """Deploy a skills-based tool (OpenCode or Claude Code) to target_path.
+
+    Neither tool has a Custom Agent file format, so callers should merge any
+    custom-mode agent ids into agent_ids before calling this — they still get
+    deployed as Skills here.
 
     Args:
         target_path: Root target directory.
@@ -145,6 +159,7 @@ def init_project(
     tools: ToolSelection,
     guidelines: GuidelineSelection,
     agent_ids: frozenset[str] | None = None,
+    custom_agent_ids: frozenset[str] | None = None,
 ) -> DeploymentResult:
     """Deploy the selected tools and guideline templates to target_path.
 
@@ -153,8 +168,11 @@ def init_project(
         target_path: Destination project root.
         tools: Which AI tools to deploy.
         guidelines: Selected guideline template files.
-        agent_ids: Agent ids to deploy, or None to deploy every agent (e.g. the
-            CLI, which has no skill selection).
+        agent_ids: Agent ids to deploy as Skills, or None to deploy every agent
+            (e.g. the CLI, which has no skill selection).
+        custom_agent_ids: Agent ids to deploy as Custom Agent files (Copilot
+            only; deployed as Skills for OpenCode/Claude, which have no Custom
+            Agent format). None or empty deploys none in this format.
 
     Returns:
         DeploymentResult describing what was deployed.
@@ -169,16 +187,17 @@ def init_project(
     validate_dirs(src.agents, src.instructions, src.guidelines)
 
     deployed: dict[str, str] = {}
+    skills_and_custom_ids = None if agent_ids is None else agent_ids | (custom_agent_ids or frozenset())
 
     if tools.copilot:
-        deployed["copilot"] = _deploy_copilot(target_path, src, repo_root, guidelines, agent_ids)
+        deployed["copilot"] = _deploy_copilot(target_path, src, repo_root, guidelines, agent_ids, custom_agent_ids)
     if tools.opencode:
         deployed["opencode"] = _deploy_skills_tool(
-            target_path, ".opencode/skills", "opencode", src, repo_root, guidelines, agent_ids
+            target_path, ".opencode/skills", "opencode", src, repo_root, guidelines, skills_and_custom_ids
         )
     if tools.claude:
         deployed["claude"] = _deploy_skills_tool(
-            target_path, ".claude/skills", "claude", src, repo_root, guidelines, agent_ids
+            target_path, ".claude/skills", "claude", src, repo_root, guidelines, skills_and_custom_ids
         )
 
     return DeploymentResult(target_path=target_path, tools=tools, guidelines=guidelines, deployed=deployed)

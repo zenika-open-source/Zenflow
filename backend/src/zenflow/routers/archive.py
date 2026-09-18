@@ -31,6 +31,7 @@ class ArchiveRequest(BaseModel):
     tools: ToolSelectionRequest
     guidelines: GuidelineSelectionRequest = Field(default_factory=GuidelineSelectionRequest)
     skills: list[str] | None = None
+    custom_skills: list[str] | None = None
 
 
 def _zip_directory(directory: str) -> io.BytesIO:
@@ -67,6 +68,7 @@ def init_archive(request: ArchiveRequest) -> StreamingResponse:
         HTTPException: 400 if no tool is selected or a source directory is missing.
     """
     agent_ids = resolve_agent_ids(request.skills) if request.skills is not None else None
+    custom_agent_ids = resolve_agent_ids(request.custom_skills) if request.custom_skills is not None else None
     tmp_dir = tempfile.mkdtemp(prefix="zenflow-")
     try:
         init_project(
@@ -75,6 +77,7 @@ def init_archive(request: ArchiveRequest) -> StreamingResponse:
             request.tools.to_domain(),
             request.guidelines.to_domain(),
             agent_ids,
+            custom_agent_ids,
         )
         buffer = _zip_directory(tmp_dir)
     except ZenflowError as exc:

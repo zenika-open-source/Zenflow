@@ -10,12 +10,12 @@ EXPECTED_AGENT_IDS = {
     "backend",
     "frontend",
     "reviewer",
-    "git",
     "documentation",
     "orchestrator",
     "product-requirements",
     "static-prototyping",
     "dynamic-prototyping",
+    "retrodoc-architecture",
 }
 
 

@@ -5,11 +5,12 @@ export async function downloadArchive(
   tools: ToolSelection,
   guidelines: GuidelineSelection,
   skills: string[],
+  customSkills: string[],
 ): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/init/archive`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tools, guidelines, skills }),
+    body: JSON.stringify({ tools, guidelines, skills, custom_skills: customSkills }),
   });
 
   if (!response.ok) {

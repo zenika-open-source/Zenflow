@@ -3,11 +3,11 @@
 ] %}
 ---
 name: Orchestrator
-description: Orchestrates full-stack feature delivery — calls Backend, Frontend, Docs, Reviewer, Git.
+description: Orchestrates full-stack feature delivery — calls Backend, Frontend, Docs, Reviewer.
 {% if not skill_mode %}
 argument-hint: Describe the feature to build (e.g. "Build a user feedback form with POST /api/feedback endpoint")
 tools: [agent, read/readFile, agent/runSubagent, agent, vscode/askQuestions]
-agents: [Backend, Frontend, Documentation, Reviewer, Git]
+agents: [Backend, Frontend, Documentation, Reviewer]
 user-invocable: true
 handoffs:
 {% for h in handoffs %}
@@ -32,37 +32,9 @@ When you receive a feature request, follow this **exact state machine**. Do not 
 
 ---
 
-### STEP 0 — Create Branch (Git)
+### STEP 0 — Create Feature Plan (Backend)
 
-Before anything else — before planning, before writing code — ask the user whether they want to create a new branch.
-
-**Ask the user**:
-> "Would you like to create a new branch for this feature?"
-
-- If **no**: skip branch creation and proceed to STEP 1.
-- If **yes**: ask for branch name preference with options (recommended: proposed):
-  > "Proposed branch name: `feature/[feature-slug]`. Which option?"
-  >
-  > 1. Keep this name
-  > 2. Enter your own name
-
-  Wait for the user's choice, then call **@Git** to create and check out the branch:
-
-  ```
-  Prompt to Git:
-  "Create a branch for this feature.
-  Branch name: [chosen branch name]
-  Base branch is main. Check out the new branch."
-  ```
-
-  **Wait** for Git to confirm the branch is created and checked out before proceeding.
-  **Do not proceed** until the branch exists — code should never be written on `main` or `develop`.
-
----
-
-### STEP 1 — Create Feature Plan (Backend)
-
-Ask the user if the feature involves backend changes. If it is not needed, skip to step 3.
+Ask the user if the feature involves backend changes. If it is not needed, skip to step 2.
 
 Call **@Backend** in plan mode:
 
@@ -81,14 +53,14 @@ Do NOT create `docs/plans/` inside `backend/`, `frontend/`, or any service-speci
 **Ask the user**:
 > "The feature plan has been saved to `docs/plans/[feature-slug].md`. Does it look good?"
 
-- If **approve**: proceed to STEP 2 (implementation)
+- If **approve**: proceed to STEP 1 (implementation)
 - If **provide feedback**: show a text input asking for specific feedback, then relay to Backend for revision
 
 **Do not proceed** to implementation until the user explicitly approves the plan.
 
 ---
 
-### STEP 2 — Implement Backend (step by step)
+### STEP 1 — Implement Backend (step by step)
 
 Call **@Backend** in implement mode, passing the approved plan:
 
@@ -113,9 +85,9 @@ If still failing after one retry, stop and inform the user.
 
 ---
 
-### STEP 3 — Create Frontend Plan (Frontend)
+### STEP 2 — Create Frontend Plan (Frontend)
 
-Ask the user if the feature involves frontend changes. If it is not needed, skip to step 5.
+Ask the user if the feature involves frontend changes. If it is not needed, skip to step 4.
 
 Call **@Frontend** in plan mode:
 
@@ -138,14 +110,14 @@ Do NOT create `docs/plans/` inside `backend/`, `frontend/`, or any service-speci
 **Ask the user**:
 > "The frontend plan has been saved to `docs/plans/[feature-slug]-frontend.md`. Does it look good?"
 
-- If **approve**: proceed to STEP 4 (implementation)
+- If **approve**: proceed to STEP 3 (implementation)
 - If **provide feedback**: show a text input asking for specific feedback, then relay to Frontend for revision
 
 **Do not proceed** to implementation until the user explicitly approves the plan.
 
 ---
 
-### STEP 4 — Implement Frontend (step by step)
+### STEP 3 — Implement Frontend (step by step)
 
 Call **@Frontend** with:
 
@@ -174,7 +146,7 @@ If still failing after one retry, stop and inform the user.
 
 ---
 
-### STEP 5 — Call Reviewer sub-agent
+### STEP 4 — Call Reviewer sub-agent
 
 Use the `agent` tool to call **@Reviewer** with:
 
@@ -193,13 +165,13 @@ Check for: security issues, Java/Spring best practices, React best practices, ac
 
 **Wait** for Reviewer to return.
 **Check overall status**:
-- `✅ APPROVED` → proceed to Step 6 (Documentation)
-- `⚠️ APPROVED WITH NOTES` → inform user, proceed to Step 6 (Documentation)
+- `✅ APPROVED` → proceed to Step 5 (Documentation)
+- `⚠️ APPROVED WITH NOTES` → inform user, proceed to Step 5 (Documentation)
 - `❌ BLOCKED` → show critical issues to user. **Do NOT proceed to Git.**
 
 ---
 
-### STEP 6 — Call Documentation sub-agent
+### STEP 5 — Call Documentation sub-agent
 
 Use the `agent` tool to call **@Documentation** with:
 

@@ -19,7 +19,7 @@ export function SkillRow({ skill, mode, color, onChange }: SkillRowProps) {
     >
       <div className={`text-[13px] font-bold ${effectiveMode === "none" ? "opacity-40" : ""}`}>
         {skill.label}
-        {disabled && <span className="ml-2 text-xs font-semibold text-[#8a8290]">(coming soon)</span>}
+        {skill.sublabel && <span className="ml-2 text-xs font-semibold text-[#8a8290]">{skill.sublabel}</span>}
       </div>
       <RadioDot
         name={skill.id}

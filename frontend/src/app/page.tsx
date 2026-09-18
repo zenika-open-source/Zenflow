@@ -12,10 +12,6 @@ import type { SkillMode } from "@/types/skills";
 import type { AssistantId, GuidelineSelection, StackCatalog, ToolSelection } from "@/types/zenflow";
 
 const DEFAULT_EXPANDED_CATEGORY = (SKILL_CATEGORIES.find((c) => !c.disabled) ?? SKILL_CATEGORIES[0]).id;
-const DEFAULT_SKILL_SELECTIONS: Record<string, SkillMode> = {
-  frontend: "skill",
-  "code-review": "skill",
-};
 
 export default function Home() {
   const [catalog, setCatalog] = useState<StackCatalog | null>(null);
@@ -24,7 +20,7 @@ export default function Home() {
   const [backendArchFile, setBackendArchFile] = useState("");
   const [frontendArchFile, setFrontendArchFile] = useState("");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(DEFAULT_EXPANDED_CATEGORY);
-  const [skillSelections, setSkillSelections] = useState<Record<string, SkillMode>>(DEFAULT_SKILL_SELECTIONS);
+  const [skillSelections, setSkillSelections] = useState<Record<string, SkillMode>>({});
   const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
   const tools: ToolSelection = {
