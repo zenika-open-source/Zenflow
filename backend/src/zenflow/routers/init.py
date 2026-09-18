@@ -27,6 +27,7 @@ def init(request: InitRequest) -> InitResponse:
         HTTPException: 400 if no tool is selected or a source directory is missing.
     """
     agent_ids = resolve_agent_ids(request.skills) if request.skills is not None else None
+    custom_agent_ids = resolve_agent_ids(request.custom_skills) if request.custom_skills is not None else None
     try:
         result = init_project(
             repo_root(),
@@ -34,6 +35,7 @@ def init(request: InitRequest) -> InitResponse:
             request.tools.to_domain(),
             request.guidelines.to_domain(),
             agent_ids,
+            custom_agent_ids,
         )
     except ZenflowError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

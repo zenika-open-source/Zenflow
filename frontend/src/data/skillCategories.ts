@@ -7,10 +7,9 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     color: "#c81c5c",
     tint: "#fbe7ee",
     skills: [
-      { id: "product-requirements", label: "Product Requirements" }, // -> product-requirements agent
-      { id: "static-prototyping", label: "Static prototyping" }, // -> static-prototyping agent
-      { id: "dynamic-prototyping", label: "Dynamic prototyping" }, // -> dynamic-prototyping agent
-      { id: "data-exploration", label: "Data exploration", disabled: true }, // no backend agent yet
+      { id: "product-requirements", label: "Product Requirements", sublabel: "generate/update PRD documents" }, // -> product-requirements agent
+      { id: "static-prototyping", label: "Static prototyping", sublabel: "greyscale wireframes, low-fidelity" }, // -> static-prototyping agent
+      { id: "dynamic-prototyping", label: "Dynamic prototyping", sublabel: "interactive, high-fidelity, html and Javascript only" }, // -> dynamic-prototyping agent
     ],
   },
   {
@@ -25,7 +24,7 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
       { id: "tech-migration", label: "Tech Migration", disabled: true }, // no backend agent
       { id: "code-review", label: "Code review" }, // -> reviewer agent
       { id: "orchestrator", label: "Full-stack orchestration" }, // -> orchestrator agent
-      { id: "git", label: "Git workflow" }, // -> git agent
+      { id: "retrodoc-architecture", label: "Retrodoc - Architecture", sublabel: "Agent relies on goretex.ai, goretex should be installed before using this agent" }, // -> retrodoc-architecture agent
     ],
   },
   {

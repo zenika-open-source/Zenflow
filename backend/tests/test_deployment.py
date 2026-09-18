@@ -22,12 +22,12 @@ ALL_AGENT_NAMES = {
     "backend",
     "frontend",
     "reviewer",
-    "git",
     "documentation",
     "orchestrator",
     "product-requirements",
     "static-prototyping",
     "dynamic-prototyping",
+    "retrodoc-architecture",
 }
 
 

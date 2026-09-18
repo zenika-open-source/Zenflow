@@ -16,12 +16,12 @@ ALL_AGENTS = [
     "backend",
     "frontend",
     "reviewer",
-    "git",
     "documentation",
     "orchestrator",
     "product-requirements",
     "static-prototyping",
     "dynamic-prototyping",
+    "retrodoc-architecture",
 ]
 
 ALL_TOOLS = ["copilot", "opencode", "claude"]

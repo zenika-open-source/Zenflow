@@ -59,3 +59,35 @@ def test_guideline_selection_include_properties() -> None:
     )
     assert with_both.include_backend
     assert with_both.include_frontend
+
+
+def test_custom_agent_ids_deploy_as_agent_md_for_copilot(repo_root: str, tmp_target: Path) -> None:
+    """custom_agent_ids must produce .agent.md files under .github/agents for Copilot."""
+    tools = ToolSelection(copilot=True, opencode=False, claude=False)
+    init_project(
+        repo_root,
+        str(tmp_target),
+        tools,
+        NO_GUIDELINES,
+        agent_ids=frozenset(),
+        custom_agent_ids=frozenset({"backend"}),
+    )
+
+    assert (tmp_target / ".github" / "agents" / "backend.agent.md").exists()
+    assert not (tmp_target / ".github" / "skills" / "backend").exists()
+
+
+def test_custom_agent_ids_deploy_as_skill_for_opencode(repo_root: str, tmp_target: Path) -> None:
+    """OpenCode has no Custom Agent format, so custom_agent_ids still deploy as Skills."""
+    tools = ToolSelection(copilot=False, opencode=True, claude=False)
+    init_project(
+        repo_root,
+        str(tmp_target),
+        tools,
+        NO_GUIDELINES,
+        agent_ids=frozenset(),
+        custom_agent_ids=frozenset({"backend"}),
+    )
+
+    assert (tmp_target / ".opencode" / "skills" / "backend" / "SKILL.md").exists()
+
