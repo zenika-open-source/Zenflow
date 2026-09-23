@@ -43,6 +43,8 @@ def test_deploys_selected_tools_and_reports_result(repo_root: str, tmp_target: P
     assert os.path.isdir(result.deployed["opencode"])
     assert (tmp_target / ".github" / "skills" / "backend" / "SKILL.md").exists()
     assert (tmp_target / ".opencode" / "skills" / "backend" / "SKILL.md").exists()
+    assert (tmp_target / ".github" / "skills" / "tech-migration" / "SKILL.md").exists()
+    assert (tmp_target / ".opencode" / "skills" / "tech-migration" / "SKILL.md").exists()
     assert not (tmp_target / ".claude").exists()
 
 
@@ -90,4 +92,3 @@ def test_custom_agent_ids_deploy_as_skill_for_opencode(repo_root: str, tmp_targe
     )
 
     assert (tmp_target / ".opencode" / "skills" / "backend" / "SKILL.md").exists()
-

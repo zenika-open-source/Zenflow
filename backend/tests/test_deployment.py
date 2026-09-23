@@ -28,6 +28,7 @@ ALL_AGENT_NAMES = {
     "static-prototyping",
     "dynamic-prototyping",
     "retrodoc-architecture",
+    "tech-migration",
 }
 
 

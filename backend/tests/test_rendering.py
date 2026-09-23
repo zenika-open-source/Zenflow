@@ -22,6 +22,7 @@ ALL_AGENTS = [
     "static-prototyping",
     "dynamic-prototyping",
     "retrodoc-architecture",
+    "tech-migration",
 ]
 
 ALL_TOOLS = ["copilot", "opencode", "claude"]
@@ -196,6 +197,52 @@ def test_documentation_agent_project_context(repo_root: str, tool: str, expected
     env = make_env(repo_root)
     result = _render_agent(env, "documentation", tool, skill_mode=False)
     assert expected_ctx in result
+
+
+@pytest.mark.parametrize(
+    "tool,expected_context",
+    [
+        ("copilot", ".github/copilot-instructions.md"),
+        ("opencode", "AGENTS.md"),
+        ("claude", "CLAUDE.md"),
+    ],
+)
+@pytest.mark.parametrize("skill_mode", [True, False])
+def test_tech_migration_preserves_planning_contract(
+    repo_root: str, tool: str, expected_context: str, skill_mode: bool
+) -> None:
+    result = _render_agent(make_env(repo_root), "tech-migration", tool, skill_mode=skill_mode)
+
+    assert "name: Tech Migration" in result
+    assert "docs/plans/[migration-slug].md" in result
+    assert f"Read `{expected_context}` if present" in result
+    assert "do not require either to exist" in result
+    for gate in range(8):
+        assert f"### G{gate} -" in result
+    assert "do not execute them" in result
+    assert "neither establishes implementation or release" in result
+    assert "tech-migration-planner" not in result
+    if skill_mode:
+        assert "## Next Steps" in result
+        assert "tools:" not in result
+    else:
+        assert "## Next Steps" not in result
+        assert "agent: Tech Migration" in result
+
+
+@pytest.mark.parametrize("skill_mode", [True, False])
+def test_orchestrator_routes_migrations_without_implementing(repo_root: str, skill_mode: bool) -> None:
+    result = _render_agent(make_env(repo_root), "orchestrator", "copilot", skill_mode=skill_mode)
+
+    assert "Tech Migration was installed" in result
+    assert "Stop here" in result
+    assert "G2 and later require their own owners" in result
+    assert "### STEP 0 — Create Feature Plan" in result
+    if skill_mode:
+        assert "Load the installed **Tech Migration** skill" in result
+    else:
+        assert "agents: [Backend, Frontend, Documentation, Reviewer, Tech Migration]" in result
+        assert "do not try to call a nonexistent custom agent" in result
 
 
 # ---------------------------------------------------------------------------
