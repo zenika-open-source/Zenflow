@@ -15,6 +15,19 @@ These templates will be initialized as either Agents for Copilot or Skills for C
 
 In general there is no need to change these files, as they determine primarily the workflow and will redirect the tool to refer to the guideline files (next section) for the rules that the agent/skill should follow.
 
+`agents/tech-migration.md.j2` adapts the planning-only Tech Migration workflow.
+It is self-contained: project instructions and installed stack guidelines are
+optional context, not required companion files. Copilot can render it as either
+`.github/agents/tech-migration.agent.md` or
+`.github/skills/tech-migration/SKILL.md`; OpenCode and Claude Code render it as
+`skills/tech-migration/SKILL.md` in their own tool directories. The selected
+setup stack is the current-project context, not an automatic target stack.
+Migration plans default to `docs/plans/[migration-slug].md`; G0-G7 describe
+later evidence and approvals, not work the planner executes. The Orchestrator
+can use an installed Tech Migration agent/skill for migration requests and
+stops after plan review. Select Tech Migration separately when exporting only
+selected workflows.
+
 2. Guidelines
 
 Based on the stack chosen by the user when running the init command, the relevant files will be copied to:

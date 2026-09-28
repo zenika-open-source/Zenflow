@@ -25,9 +25,13 @@ Follow the prompts to:
 ### What the script installs
 After running the script, the target repository will have:
 
-- **.github/skills/**, **.github/instructions/** (if GitHub Copilot selected)
+- **.github/skills/**, **.github/instructions/** (if GitHub Copilot selected); the web/API Custom Agent choice instead writes selected agents to **.github/agents/**
 - **.opencode/skills/** (if OpenCode selected)
 - **.claude/skills/** (if Claude Code selected)
+
+The CLI installs every available workflow as a skill. The web generator and API
+can select individual workflows: GitHub Copilot offers either a skill or a
+custom agent per selection; OpenCode and Claude Code use skills for both choices.
 
 ### Recommended Supporting Files
 For best results, ensure the target project provides additional context:
@@ -57,6 +61,33 @@ This workflow delivers a complete feature end-to-end, from branch creation to a 
 | 7 | Git | Stages changes, writes a conventional commit, and prepares a PR description |
 
 For a detailed flow diagram, see [docs/diagrams/fullstack-newfeature.md](docs/diagrams/fullstack-newfeature.md).
+
+### 2. Tech Migration — Planning
+
+Select **Tech Migration** in the web generator, or use the CLI's installed
+`tech-migration` skill. For GitHub Copilot it can be exported as a custom agent
+(`.github/agents/tech-migration.agent.md`) or a skill
+(`.github/skills/tech-migration/SKILL.md`); OpenCode and Claude Code install
+`tech-migration/SKILL.md` under their respective `.opencode/skills/` and
+`.claude/skills/` directories. It can be invoked directly, or the installed
+Orchestrator can route a migration planning request to it. Select both
+Orchestrator and Tech Migration if you want that route; Orchestrator stops after
+plan review rather than continuing its full-stack feature implementation flow.
+
+The planner reviews the actual project and proposes one bounded migration,
+covering documentation, plan approval, red tests, implementation controls,
+green-test acceptance, safe parallel validation or an approved alternative,
+cutover, and decommission. Its default deliverable is
+`docs/plans/[migration-slug].md` at the target repository root; an explicitly
+requested location takes precedence. It does **not** run migration tests,
+change application code, deploy, approve gates, or retire the legacy system.
+Human approval of the plan does not authorize later migration stages.
+
+Stack guidelines and other skills are optional. The stack selected during
+setup describes the current project, not necessarily the migration target;
+tell the planner the target stack or identify who will decide it. The planner
+reads available project instructions and guidelines but can work without
+them, recording missing evidence and decisions as owned blockers.
 
 ## Extending and Customising Zenflow
 
