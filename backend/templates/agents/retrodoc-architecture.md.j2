@@ -72,8 +72,8 @@ Reproduced against real repos; they drive rules below.
   REST endpoints on Gin and on Express/Nest; returned **zero** on Django
   (plain `urls.py`/`path()`), with no error. An empty entry-point result is
   not proof there are no entry points — cross-check with `role` and a quick
-  text search for routing conventions, and say so in the retrodoc if you
-  suspect a gap.
+  `Grep` for routing conventions, and say so in the retrodoc if you suspect
+  a gap.
 - **`clusters` and `suggest_boundaries` report different community counts**
   for the same repo (15 vs 17, only 12 listed). Not an error; use
   `suggest_boundaries`'s own list.
@@ -97,12 +97,11 @@ Reproduced against real repos; they drive rules below.
 gortex version && gortex daemon status && gortex repos
 ```
 
-- If `gortex` is not installed, **pause and ask the user** (use
-  `vscode/askQuestions` when available) whether they want to install it or
-  skip it for this run. Explain that installing it enables graph-grounded
-  analysis; skipping uses the lower-confidence Step 6 fallback. Offer
-  explicit choices: **Install gortex (recommended)** and **Skip gortex and
-  continue without graph**. Do not silently choose the fallback.
+- If `gortex` is not installed, **pause and ask the user** whether they want
+  to install it or skip it for this run. Explain that installing it enables
+  graph-grounded analysis; skipping uses the lower-confidence Step 6 fallback.
+  Offer explicit choices: **Install gortex (recommended)** and **Skip gortex
+  and continue without graph**. Do not silently choose the fallback.
 - If they choose to install it, direct them to gortex's official installation
   instructions and wait for them to confirm installation. Never install it
   yourself. Run `gortex version` again to verify it is available before
@@ -112,10 +111,9 @@ gortex version && gortex daemon status && gortex repos
 - **Read the whole `gortex repos` table.** Any repo besides your target ⇒
   `wiki`/`wakeup` are off for this run (quirk above); plan `analyze`-only.
 - `daemon status` hanging: check whether it is *working* or *wedged* —
-  sample CPU time twice ~45 s apart (`ps -o time= -p <pid>` on Unix, or the
-  equivalent on the host OS). Advancing = busy, wait. Flat = wedged.
-  **Never restart a daemon that may be serving work you didn't start**; if
-  it's wedged, tell the user and let them decide.
+  sample CPU time twice ~45 s apart (`ps -o time= -p <pid>`). Advancing =
+  busy, wait. Flat = wedged. **Never restart a daemon that may be serving
+  work you didn't start**; if it's wedged, tell the user and let them decide.
 - Never run `gortex install` or `gortex init` — both write MCP config,
   skills and hooks into the user's global/project config.
 
@@ -247,8 +245,7 @@ across all three, with no dangling edge endpoints in any of them.
 
 `RETRODOC.md`, this order, every time:
 
-1. **Overview** — what the system is, language/framework mix, scale. Load
-   `{{ guidelines.project_context }}` first if it exists.
+1. **Overview** — what the system is, language/framework mix, scale.
 2. **Entry Points** — table: type, route/path, handler (from `routes`; flag
    suspected coverage gaps).
 3. **Components** — one subsection per diagram box: responsibility, the
@@ -263,19 +260,15 @@ across all three, with no dangling edge endpoints in any of them.
 
 ## Step 6 — Fallback without gortex
 
-Same outputs via file search, text search and file reads: entry points from
-routing/main files, components from top-level structure, dependencies from
-imports. State at the top of the retrodoc that the run is ungrounded and
-lower-confidence. If gortex was skipped, note that its version and graph
-size are unavailable instead of inventing them. Still produce all four
-diagram formats from the same model and verify their parity.
+Same outputs via `Glob`/`Grep`/`Read`: entry points from routing/main files,
+components from top-level structure, dependencies from imports. State at the
+top of the retrodoc that the run is ungrounded and lower-confidence.
 
 ## Step 7 — Output
 
 Everything to `<repo-parent>/<repo-name>-retrodoc/`: `architecture.json`,
 `architecture.html`, `architecture.drawio`, `architecture.mmd`,
-`RETRODOC.md`, and the raw `analyze-*.json` evidence when gortex was used.
-Tell the user where.
+`RETRODOC.md`, and the raw `analyze-*.json` evidence. Tell the user where.
 
 ## Validating this agent
 

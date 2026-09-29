@@ -205,15 +205,17 @@ def test_retrodoc_prompts_for_gortex_and_uses_architect_outputs(
     repo_root: str, tool: str, skill_mode: bool
 ) -> None:
     result = _render_agent(make_env(repo_root), "retrodoc-architecture", tool, skill_mode=skill_mode)
+    normalized = " ".join(result.split())
 
     assert "Install gortex (recommended)" in result
-    assert "Skip gortex and" in result
-    assert "continue without graph" in result
+    assert "Skip gortex and continue without graph" in normalized
     assert "Do not silently choose the fallback" in result
     assert "Run `gortex version` again to verify" in result
     assert "If they choose to skip, go to **Step 6**" in result
     assert "**Hard cap: 30 components.**" in result
     assert "single source of truth" in result
+    assert "Same outputs via `Glob`/`Grep`/`Read`" in result
+    assert "scale. Load" not in result
     for artifact in ("architecture.json", "architecture.html", "architecture.drawio", "architecture.mmd", "RETRODOC.md"):
         assert artifact in result
     assert "same model" in result
