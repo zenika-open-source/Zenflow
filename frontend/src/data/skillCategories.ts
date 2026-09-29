@@ -24,7 +24,7 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
       { id: "tech-migration", label: "Tech Migration", sublabel: "plan a bounded technology migration" }, // -> tech-migration agent
       { id: "code-review", label: "Code review" }, // -> reviewer agent
       { id: "orchestrator", label: "Full-stack orchestration" }, // -> orchestrator agent
-      { id: "retrodoc-architecture", label: "Retrodoc - Architecture", sublabel: "Agent relies on goretex.ai, goretex should be installed before using this agent" }, // -> retrodoc-architecture agent
+      { id: "retrodoc-architecture", label: "Retrodoc - Architecture", sublabel: "architecture diagrams and retrodocs; prompts to install gortex if missing" }, // -> retrodoc-architecture agent
     ],
   },
   {

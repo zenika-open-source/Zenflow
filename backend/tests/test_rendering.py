@@ -199,6 +199,34 @@ def test_documentation_agent_project_context(repo_root: str, tool: str, expected
     assert expected_ctx in result
 
 
+@pytest.mark.parametrize("tool", ALL_TOOLS)
+@pytest.mark.parametrize("skill_mode", [True, False])
+def test_retrodoc_prompts_for_gortex_and_uses_architect_outputs(
+    repo_root: str, tool: str, skill_mode: bool
+) -> None:
+    result = _render_agent(make_env(repo_root), "retrodoc-architecture", tool, skill_mode=skill_mode)
+    normalized = " ".join(result.split())
+
+    assert "Install gortex (recommended)" in result
+    assert "Skip gortex and continue without graph" in normalized
+    assert "Do not silently choose the fallback" in result
+    assert "Run `gortex version` again to verify" in result
+    assert "If they choose to skip, go to **Step 6**" in result
+    assert "**Hard cap: 30 components.**" in result
+    assert "single source of truth" in result
+    assert "Same outputs via `Glob`/`Grep`/`Read`" in result
+    assert "scale. Load" not in result
+    for artifact in ("architecture.json", "architecture.html", "architecture.drawio", "architecture.mmd", "RETRODOC.md"):
+        assert artifact in result
+    assert "same model" in result
+    assert "## Step 6 — Fallback without gortex" in result
+    if skill_mode:
+        assert "handoffs:" not in result
+    else:
+        assert "vscode/askQuestions" in result
+        assert "handoffs:" in result
+
+
 @pytest.mark.parametrize(
     "tool,expected_context",
     [

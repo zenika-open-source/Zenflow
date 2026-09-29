@@ -28,6 +28,13 @@ can use an installed Tech Migration agent/skill for migration requests and
 stops after plan review. Select Tech Migration separately when exporting only
 selected workflows.
 
+`agents/retrodoc-architecture.md.j2` adapts the Retrodoc Architect workflow
+for both custom agents and skills. It produces a single evidence-backed
+architecture model rendered as HTML, draw.io, and Mermaid alongside a
+structured retrodoc. If gortex is missing, it asks the user to install it
+before continuing, with an explicit option to skip and produce a
+lower-confidence, source-based retrodoc instead.
+
 2. Guidelines
 
 Based on the stack chosen by the user when running the init command, the relevant files will be copied to:
